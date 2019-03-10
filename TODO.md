@@ -1,0 +1,3 @@
+- upload json dashboard is not working
+- 2 days ago range to 24 hours
+- sql_pg_postmaster_uptime{col="uptime",database="sample",driver="postgres",host="postgres:5432",instance="sql_exporter:9237",job="sql_exporter",sql_job="global",user="sql_exporter"} - use host instead of instance

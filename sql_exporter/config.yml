@@ -1,0 +1,1236 @@
+---
+jobs:
+- name: global
+  interval: 15s
+  connections:
+  - postgres://sql_exporter:sql_exporter@postgres:5432/sample?sslmode=disable&application_name=sql_exporter
+  queries:
+  - name: pg_os_getloadavg
+    help: Load average (last 1/5/15 minutes)
+    values:
+      - load_avg_1min
+      - load_avg_5min
+      - load_avg_15min
+    query: |
+        select
+            load_avg_1min,
+            load_avg_5min,
+            load_avg_15min
+        from
+            pg_os_getloadavg() as (load_avg_1min float, load_avg_5min float, load_avg_15min float);
+
+  - name: pg_psutil_cpu_times_percent
+    help: CPU usage percents
+    values:
+      - total
+      - user
+      - system
+      - idle
+      - iowait
+      - irqs
+      - other
+    query: |
+            select
+                least("user" + system + idle + iowait + irqs + other, 100) as total,
+                "user",
+                system,
+                idle,
+                iowait,
+                irqs,
+                other
+            from
+                pg_psutil_cpu_times_percent();
+
+  - name: pg_psutil_virtual_memory
+    help: Virtual memory usage in bytes
+    values:
+      - total
+      - used
+      - free
+      - buffers_cached
+      - available
+      - percent
+    query: |
+            select
+                total,
+                used,
+                free,
+                buffers_cached,
+                available,
+                percent
+            from
+                pg_psutil_virtual_memory();
+
+  - name: pg_psutil_swap_memory
+    help: Swap memory usage in bytes
+    values:
+      - total
+      - used
+      - free
+      - percent
+    query: |
+            select
+                total,
+                used,
+                free,
+                percent
+            from
+                pg_psutil_swap_memory();
+
+  - name: pg_psutil_disk_io_counters
+    help: Disk bytes read / written
+    values:
+      - read_bytes
+      - write_bytes
+    query: |
+            select
+                read_bytes,
+                write_bytes
+            from
+                pg_psutil_disk_io_counters();
+
+  - name: pg_psutil_net_io_counters
+    help: Network bytes sent / received
+    values:
+      - sent_bytes
+      - received_bytes
+    query: |
+            select
+                sent_bytes,
+                received_bytes
+            from
+                pg_psutil_net_io_counters();
+
+  - name: pg_postmaster_uptime
+    help: Seconds since last instance start
+    values:
+      - uptime
+    query: |
+            select date_part('epoch', now() - pg_postmaster_start_time())::float as uptime;
+
+  - name: pg_stat_database_conflicts
+    help: Number of conflicts per database
+    labels:
+      - datname
+    values:
+      - tablespace
+      - lock
+      - snapshot
+      - bufferpin
+      - deadlock
+    query: |
+            select
+                datname::text,
+                confl_tablespace::float as tablespace,
+                confl_lock::float as lock,
+                confl_snapshot::float as snapshot,
+                confl_bufferpin::float as bufferpin,
+                confl_deadlock::float as deadlock
+            from
+                pg_stat_database_conflicts
+            where
+                datname !~ '^(postgres|template(0|1))$';
+
+  - name: pg_prepared_xacts
+    help: Number of prepared transactions per database
+    labels:
+      - datname
+    values:
+      - prepared_xacts
+    query: |
+            select
+                d.datname::text,
+                count(px.*)::float
+            from
+                pg_database d
+            left join
+                pg_prepared_xacts px on px.database = d.datname
+            where
+                d.datname !~ '^(postgres|template(0|1))$'
+            group by
+                d.datname;
+
+  - name: pg_stat_archiver
+    help: Number of failed/successful attempts to archive WAL
+    values:
+      - failed_wal
+      - archived_wal
+    query: |
+            select
+                failed_count::float as failed_wal,
+                archived_count::float as archived_wal
+            from
+                pg_stat_archiver;
+
+  - name: pg_ls_waldir
+    help: WAL directory stats
+    values:
+      - wal_count
+      - wal_size
+    query: |
+            select
+                count(name)::float as wal_count,
+                sum(size)::float as wal_size
+            from pg_ls_waldir();
+
+  - name: pg_stat_activity_backends
+    help: Number of backends per database
+    labels:
+      - datname
+    values:
+      - max_connections
+      - active
+      - idle
+      - idle_in_transaction
+      - idle_in_transaction_aborted
+      - fastpath_function_call
+      - disabled
+    query: |
+            select
+                datname::text,
+                current_setting('max_connections')::float as max_connections,
+                count(*) filter (where state = 'active')::float as active,
+                count(*) filter (where state = 'idle')::float as idle,
+                count(*) filter (where state = 'idle in transaction')::float as idle_in_transaction,
+                count(*) filter (where state = 'idle in transaction (aborted)')::float as idle_in_transaction_aborted,
+                count(*) filter (where state = 'fastpath function call')::float as fastpath_function_call,
+                count(*) filter (where state = 'disabled')::float as disabled
+            from
+                pg_stat_activity
+            where
+                datname !~ '^(postgres|template(0|1))$' and
+                usename not in (current_user, 'postgres') and
+                pid != pg_backend_pid() and
+                query not like 'autovacuum:%' and
+                wait_event_type != 'activity'
+            group by
+                datname;
+
+  - name: pg_stat_kcache_total_bytes
+    help: Disk read / written bytes per database
+    labels:
+      - datname
+    values:
+      - read
+      - written
+    query: |
+            select
+                datname::text,
+                sum(reads)::float as read,
+                sum(writes)::float as written
+            from
+                pg_stat_kcache_detail
+            where
+                datname !~ '^(postgres|template(0|1))$' and
+                rolname not in (current_user, 'postgres') and
+                not lower(query) like any (array['discard all', 'close all', 'deallocate%', 'set %', 'reset %', 'begin%', 'commit%', 'end%', 'rollback%', 'show%', '%pg\_%'])
+            group by
+                datname;
+
+  - name: pg_stat_database_cache_hit_ratio
+    help: Cache hit ratio per database
+    labels:
+      - datname
+    values:
+      - percents
+    query: |
+            select
+                datname::text,
+                blks_hit::float / (blks_read + blks_hit) * 100 as percents
+            from
+                pg_stat_database
+            where
+                datname !~ '^(postgres|template(0|1))$' and
+                (blks_read + blks_hit) > 0;
+
+  - name: pg_stat_database_transactions
+    help: Transaction rate per database
+    labels:
+      - datname
+    values:
+      - commited
+      - rolledback
+    query: |
+            select
+                datname,
+                xact_commit as commited,
+                xact_rollback as rolledback
+            from
+                pg_stat_database
+            where
+                datname !~ '^(postgres|template(0|1))$';
+
+  - name: pg_stat_database_tuples
+    help: Number of tuples written per database
+    labels:
+      - datname
+    values:
+      - inserted
+      - updated
+      - deleted
+    query: |
+            SELECT
+                datname::text,
+                tup_inserted::float AS inserted,
+                tup_updated::float AS updated,
+                tup_deleted::float AS deleted
+            FROM
+                pg_stat_database
+            WHERE
+                datname !~ '^(postgres|template(0|1))$';
+
+  - name: pg_locks_type
+    help: Locks number by type per database
+    labels:
+      - datname
+      - type
+    values:
+      - count
+    query: |
+            select
+                d.datname::text,
+                locktypes::text as type,
+                coalesce(l.count::float, 0) as count
+            from
+                unnest('{relation, extend, page, tuple, transactionid, virtualxid, object, userlock, advisory}'::text[]) locktypes
+            cross join
+                pg_database d
+            left join
+            (
+                select
+                    database,
+                    locktype,
+                    count(*)
+                from
+                    pg_locks
+                where database is not null
+                group by
+                    database,
+                    locktype
+            ) as l on locktypes = l.locktype and d.oid = l.database
+            where
+                d.datname !~ '^(postgres|template(0|1))$';
+
+  - name: pg_locks_mode
+    help: Locks number by mode per database
+    labels:
+      - datname
+      - mode
+    values:
+      - count
+    query: |
+            select
+                d.datname::text,
+                trim(trailing 'lock' from lockmodes)::text as mode,
+                coalesce(l.count::float, 0) as count
+            from
+                unnest('{accesssharelock, exclusivelock, rowsharelock, rowexclusivelock, sharelock, sharerowexclusivelock, shareupdateexclusivelock, accessexclusivelock}'::text[]) lockmodes
+            cross join
+                pg_database d
+            left join
+            (
+                select
+                    database,
+                    mode,
+                    count(*)
+                from
+                    pg_locks
+                where database is not null
+                group by
+                    database,
+                    mode
+            ) as l on lockmodes = lower(l.mode) and d.oid = l.database
+            where
+                d.datname !~ '^(postgres|template(0|1))$';
+
+  - name: pg_stat_activity_autovacuum_workers
+    help: Autovacuum workers
+    labels:
+      - datname
+    values:
+      - max
+      - total
+      - vacuum
+      - analyze
+      - vacuum_analyze
+      - vacuum_wraparound
+      - vacuum_analyze_wraparound
+      - brin_summarize
+    query: |
+            select
+                datname,
+                current_setting('autovacuum_max_workers')::float as max,
+                count(*) filter (where lower(query) like 'autovacuum:%')::float as total,
+                count(*) filter (where lower(query) ~ 'autovacuum: vacuum (\s+)\.(\s+)$')::float as vacuum,
+                count(*) filter (where lower(query) like 'autovacuum: analyze %')::float as analyze,
+                count(*) filter (where lower(query) ~ 'autovacuum: vacuum analyze (\s+)\.(\s+)$')::float as vacuum_analyze,
+                count(*) filter (where lower(query) ~ 'autovacuum: vacuum (\s+)\.(\s+)\ \(to prevent wraparound\)')::float as vacuum_wraparound,
+                count(*) filter (where lower(query) like 'autovacuum: vacuum analyze % (to prevent wraparound)')::float as vacuum_analyze_wraparound,
+                count(*) filter (where lower(query) like 'autovacuum: brin summarize %')::float as brin_summarize
+            from
+                pg_stat_activity
+            where
+                datname !~ '^(postgres|template(0|1))$'
+            group by
+                datname;
+
+  - name: pg_stat_activity_max_xact_age
+    help: Max transaction age per database
+    labels:
+      - datname
+    values:
+      - duration
+    query: |
+            select
+                d.datname::text,
+                coalesce(max(date_part('epoch', now() - sa.xact_start)), 0)::float as duration
+            from
+                pg_database d
+            left join pg_stat_activity sa on sa.datname = d.datname and
+                                             sa.state in ('active', 'idle in transaction') and
+                                             sa.usename not in (current_user, 'postgres')
+            where
+                d.datname !~ '^(postgres|template(0|1))$'
+            group by d.datname;
+
+- name: global
+  interval: 60s
+  connections:
+  - postgres://sql_exporter:sql_exporter@postgres:5432/sample?sslmode=disable&application_name=sql_exporter
+  queries:
+  - name: pg_current_logfile_errors
+    help: Number of errors in the current log file
+    values:
+      - logfile_errors
+      - corrupted_pages
+    query: |
+            select
+                errors_count as logfile_errors,
+                corrupted_pages
+            from
+                pg_current_logfile_errors() as (errors_count float, corrupted_pages float);
+
+  - name: pg_stat_replication_lag
+    help: Replication lag in seconds
+    values:
+      - seconds
+    query: |
+            select
+                case
+                    when pg_last_wal_receive_lsn() = pg_last_wal_replay_lsn() then 0::float
+                    else greatest(0, extract (epoch from now() - pg_last_xact_replay_timestamp()))::float
+                end as seconds;
+
+  - name: pg_replication_slots
+    help: Number of non-active replication slots
+    values:
+      - inactive_slot
+    query: |
+            select
+                count(*)::float as inactive_slot
+            from
+                pg_replication_slots
+            where
+                not active;
+
+  - name: pg_wal_rate
+    help: WAL rate
+    values:
+      - lsn_diff
+    query: |
+            select pg_lsn_mi(pg_current_wal_lsn(), '0/0')::float as lsn_diff;
+
+  - name: pg_stat_statements_avg_time
+    help: Average response time per database
+    labels:
+      - datname
+    values:
+      - avg_time
+    query: |
+            select
+                d.datname::text,
+                sum(ss.total_time)::float / sum(ss.calls) as avg_time
+            from
+                pg_stat_statements ss,
+                pg_database d,
+                pg_user u
+            where
+                ss.calls > 0 and
+                ss.dbid = d.oid and
+                ss.userid = u.usesysid and
+                d.datname !~ '^(postgres|template(0|1))$' and
+                u.usename not in (current_user, 'postgres') and
+                not lower(ss.query) like any (array['discard all', 'close all', 'deallocate%', 'set %', 'reset %', 'begin%', 'commit%', 'end%', 'rollback%', 'show%', '%pg\_%'])
+            group by
+                d.datname;
+
+  - name: pg_stat_database_temp_files
+    help: Size of temporary files per database
+    labels:
+      - datname
+    values:
+      - temp_bytes
+    query: |
+            select
+                datname::text,
+                temp_bytes::float
+            from
+                pg_stat_database
+            where
+                datname !~ '^(postgres|template(0|1))$';
+
+  - name: pg_stat_bgwriter_checkpoints
+    help: Checkpoints info
+    values:
+      - timed
+      - requested
+    query: |
+            select
+                checkpoints_timed::float as timed,
+                checkpoints_req::float as requested
+            from
+                pg_stat_bgwriter;
+
+  - name: pg_stat_bgwriter_buffers
+    help: Number of buffers written
+    values:
+      - checkpoint
+      - clean
+      - backend
+    query: |
+            select
+                buffers_checkpoint::float as checkpoint,
+                buffers_clean::float as clean,
+                buffers_backend::float as backend
+            from
+                pg_stat_bgwriter;
+
+  - name: pg_database_size
+    help: Size in bytes of each database
+    labels:
+      - datname
+    values:
+      - size
+    query: |
+            select
+                datname::text,
+                pg_database_size(datname)::float as size
+            from
+                pg_database
+            where
+                datname !~ '^(postgres|template(0|1))$';
+
+- name: global
+  interval: 600s
+  connections:
+  - postgres://sql_exporter:sql_exporter@postgres:5432/sample?sslmode=disable&application_name=sql_exporter
+  queries:
+  - name: pg_stat_kcache_hit_ratio
+    help: Shared memory, kernel cache and disk hit ratio per database
+    labels:
+      - datname
+    values:
+      - shared
+      - oscache
+      - disk
+    query: |
+            select
+                d.datname::text,
+                sum(ss.shared_blks_hit * 8192) * 100 / sum(ss.shared_blks_hit * 8192 + ss.shared_blks_read * 8192)::float as shared,
+                sum(ss.shared_blks_read * 8192 - sk.reads) * 100 / sum(ss.shared_blks_hit * 8192 + ss.shared_blks_read * 8192)::float as oscache,
+                sum(sk.reads) * 100 / sum(ss.shared_blks_hit * 8192 + ss.shared_blks_read * 8192)::float as disk
+            from
+                pg_stat_statements ss
+            join
+                pg_stat_kcache() sk using (userid, dbid, queryid)
+            join
+                pg_database d on ss.dbid = d.oid
+            join
+                pg_user u on ss.userid = u.usesysid
+            where
+                (ss.shared_blks_hit + ss.shared_blks_read) > 0 and
+                d.datname !~ '^(postgres|template(0|1))$' and
+                u.usename not in (current_user, 'postgres') and
+                not lower(ss.query) like any (array['discard all', 'close all', 'deallocate%', 'set %', 'reset %', 'begin%', 'commit%', 'end%', 'rollback%', 'show%', '%pg\_%'])
+            group by
+                d.datname;
+
+  - name: pg_stat_statements_duration
+    help: Top statements by duration per database
+    labels:
+      - datname
+      - query
+      - queryid
+    values:
+      - avg_time
+    query: |
+            select
+                datname::text,
+                query::text,
+                queryid::text,
+                avg_time::float
+            from (
+                select
+                    d.datname,
+                    ltrim(regexp_replace(lower(ss.query), E'[ \\t\\n\\r]+' , ' ', 'g'))::varchar(100) as query,
+                    queryid,
+                    mean_time as avg_time,
+                    rank() over (
+                      partition by datname
+                      order by mean_time desc
+                    )
+                from
+                    pg_stat_statements ss,
+                    pg_user u,
+                    pg_database d
+                where
+                    d.datname !~ '^(postgres|template(0|1))$' and
+                    d.oid = ss.dbid and
+                    ss.userid = u.usesysid and
+                    u.usename not in (current_user, 'postgres') and
+                    not lower(ss.query) like any (array['discard all', 'close all', 'deallocate%', 'set %', 'reset %', 'begin%', 'commit%', 'end%', 'rollback%', 'show%', '%pg\_%']) and
+                    mean_time > 0
+            ) as t
+            where
+              rank <= 10;
+
+  - name: pg_stat_statements_frequency
+    help: Top statements by calls per database
+    labels:
+      - datname
+      - query
+      - queryid
+    values:
+      - calls
+    query: |
+            select
+                datname::text,
+                query::text,
+                queryid::text,
+                calls::float
+            from (
+                select
+                    d.datname,
+                    ltrim(regexp_replace(lower(ss.query), E'[ \\t\\n\\r]+' , ' ', 'g'))::varchar(100) as query,
+                    queryid,
+                    ss.calls,
+                    rank() over (
+                      partition by datname
+                      order by ss.calls desc
+                    )
+                from
+                    pg_stat_statements ss,
+                    pg_user u,
+                    pg_database d
+                where
+                    d.datname !~ '^(postgres|template(0|1))$' and
+                    d.oid = ss.dbid and
+                    ss.userid = u.usesysid and
+                    u.usename not in (current_user, 'postgres') and
+                    not lower(ss.query) like any (array['discard all', 'close all', 'deallocate%', 'set %', 'reset %', 'begin%', 'commit%', 'end%', 'rollback%', 'show%', '%pg\_%']) and
+                    ss.calls > 0
+            ) as t
+            where
+              rank <= 10;
+
+  - name: pg_stat_statements_result_rows
+    help: Top statements by retrieved or affected rows per database
+    labels:
+      - datname
+      - query
+      - queryid
+    values:
+      - rows
+    query: |
+            select
+                datname::text,
+                query::text,
+                queryid::text,
+                rows::float
+            from (
+                select
+                    datname,
+                    ltrim(regexp_replace(lower(ss.query), E'[ \\t\\n\\r]+' , ' ', 'g'))::varchar(100) as query,
+                    queryid,
+                    rows,
+                    rank() over (
+                        partition by datname
+                        order by rows desc
+                    )
+                from
+                    pg_stat_statements ss,
+                    pg_user u,
+                    pg_database d
+                where
+                    d.datname !~ '^(postgres|template(0|1))$' and
+                    d.oid = ss.dbid and
+                    ss.userid = u.usesysid and
+                    u.usename not in (current_user, 'postgres') and
+                    not lower(ss.query) like any (array['discard all', 'close all', 'deallocate%', 'set %', 'reset %', 'begin%', 'commit%', 'end%', 'rollback%', 'show%', '%pg\_%']) and
+                    rows > 0
+            ) as t
+            where
+                rank <= 10;
+
+  - name: pg_stat_statements_disk_hit
+    help: Top statements by read bytes from disk per database
+    labels:
+      - datname
+      - query
+      - queryid
+    values:
+      - read_bytes
+    query: |
+            select
+                datname::text,
+                query::text,
+                queryid::text,
+                reads::float as read_bytes
+            from (
+                select
+                    datname,
+                    ltrim(regexp_replace(lower(query), E'[ \\t\\n\\r]+' , ' ', 'g'))::varchar(100) as query,
+                    k.queryid,
+                    reads,
+                    rank() over (
+                        partition by datname
+                        order by reads desc
+                    )
+                from
+                    pg_stat_kcache() k(queryid, userid, dbid, reads)
+                join
+                    pg_stat_statements s on k.queryid = s.queryid and k.dbid = s.dbid and k.userid = s.userid
+                join
+                    pg_database d on d.oid = s.dbid
+                join
+                    pg_roles r on r.oid = s.userid
+                where
+                    datname !~ '^(postgres|template(0|1))$' and
+                    rolname not in (current_user, 'postgres') and
+                    not lower(query) like any (array['discard all', 'close all', 'deallocate%', 'set %', 'reset %', 'begin%', 'commit%', 'end%', 'rollback%', 'show%', '%pg\_%']) and
+                    reads > 0
+            ) as t
+            where
+                rank <= 10;
+
+  - name: pg_buffercache_pages
+    help: Max/used/free shared buffers per database
+    labels:
+      - datname
+    values:
+      - max
+      - used
+      - free
+    query: |
+            select
+                d.datname::text,
+                s.setting::float as max,
+                count(*)::float as used,
+                count(*) filter (where b.reldatabase is null)::float as free
+            from
+                pg_buffercache b,
+                pg_database d,
+                pg_settings s
+            where
+                b.reldatabase = d.oid and
+                d.datname !~ '^(postgres|template(0|1))$' and
+                s.name = 'shared_buffers'
+            group by
+                d.datname,
+                s.setting;
+
+  - name: pg_database_xacts_before_wraparound_vacuum
+    help: Transactions left before wraparound vacuum per database
+    labels:
+      - datname
+    values:
+      - xacts
+    query: |
+            select
+                datname::text,
+                least(
+                    (select setting::int from pg_settings where name = 'autovacuum_freeze_max_age') - age(datfrozenxid),
+                    (select setting::int from pg_settings where name = 'autovacuum_multixact_freeze_max_age') - mxid_age(datminmxid)
+                )::float as xacts
+            from
+                pg_database
+            where
+                datname !~ '^(postgres|template(0|1))$';
+
+  - name: pg_settings_file_hash
+    help: Hash values for config files to detect changes
+    labels:
+      - file
+    values:
+      - hash
+    query: |
+            select
+                'postgresql.conf'::text as file,
+                ('x'||substr(md5(array_to_json(array_agg(row_to_json(t)))::text),1,16))::bit(64)::bigint::float as hash
+            from (
+                select
+                    name,
+                    setting
+                from
+                    pg_settings
+                where
+                    context <> 'internal'
+                order by
+                    name
+            ) t
+            union all
+            select
+                'pg_hba.conf'::text as file,
+                ('x'||substr(md5(array_to_json(array_agg(row_to_json(t)))::text),1,16))::bit(64)::bigint::float as hash
+            from (
+                select
+                    line_number,
+                    type,
+                    database,
+                    user_name,
+                    address,
+                    netmask,
+                    auth_method,
+                    options,
+                    error
+                from
+                    pg_hba_file_rules
+                order by
+                    line_number
+            ) t;
+
+####################### DATABASE SPECIFIC STATS #######################
+
+- name: database-specific
+  interval: 30s
+  connections:
+  - postgres://sql_exporter:sql_exporter@postgres:5432/sample?sslmode=disable&application_name=sql_exporter
+  queries:
+
+  - name: pg_stat_user_tables_orphaned
+    help: Number of orphaned tables
+    values:
+      - orphaned_tables
+    query: |
+            select
+                count(c.relname)::float as orphaned_tables
+            from
+                pg_class c
+            join
+                pg_namespace n on c.relnamespace = n.oid
+            where
+                pg_is_other_temp_schema(c.relnamespace);
+
+  - name: pg_stat_user_indexes_unused
+    help: Top unused indexes by size
+    labels:
+      - index
+    values:
+      - size
+    query: |
+            select
+                s.indexrelname::text as index,
+                pg_relation_size(s.indexrelid)::float as size
+            from
+                pg_stat_user_indexes s
+            join
+                pg_index i on s.indexrelid = i.indexrelid
+            where
+                s.idx_scan = 0 and     -- has never been scanned
+                0 <> all(i.indkey) and -- no index column is an expression
+                not exists (           -- does not enforce a constraint
+                    select
+                        1
+                    from
+                        pg_constraint c
+                    where
+                        c.conindid = s.indexrelid
+                )
+            order by
+                pg_relation_size(s.indexrelid) desc
+            limit 10;
+
+  - name: pg_stat_user_indexes_redundant
+    help: Top redundant indexes by size
+    labels:
+      - index
+    values:
+      - size
+    query: |
+            select
+                (array_agg(indexrelid::regclass))[1]::text as index,
+                sum(pg_relation_size(indexrelid))::float as size
+            from
+                pg_index
+            group by
+                (indrelid::text || indclass::text || indkey::text || coalesce(indexprs::text, '') || coalesce(indpred::text, ''))
+            having
+                count(*) > 1;
+
+  - name: pg_stat_user_tables_size
+    help: Top tables/matviews by size
+    labels:
+      - relname
+    values:
+      - size
+      - indexes
+      - total
+    query: |
+            select
+                relname,
+                pg_table_size(c.oid) as size,
+                pg_indexes_size(c.oid) as indexes,
+                pg_total_relation_size(c.oid) as total
+            from
+                pg_class c
+            left join
+                pg_namespace n on (n.oid = c.relnamespace)
+            where
+                nspname !~ '^(pg_catalog|information_schema|pg_toast.*|pg_temp.*)' and
+                relkind in ('r', 'm')
+            order by
+                pg_total_relation_size(c.oid) desc
+            limit 10;
+
+  - name: pg_stat_user_indexes_size
+    help: Top indexes by size
+    labels:
+      - relname
+    values:
+      - size
+    query: |
+            select
+                relname,
+                pg_table_size(c.oid) as size
+            from
+                pg_class c
+            left join
+                pg_namespace n on (n.oid = c.relnamespace)
+            where
+                nspname !~ '^(pg_catalog|information_schema|pg_toast.*|pg_temp.*)' and
+                relkind = 'i'
+            order by
+                pg_total_relation_size(c.oid) desc
+            limit 10;
+
+  - name: pg_stat_user_indexes_invalid
+    help: Number of invalid indexes
+    values:
+      - invalid_index
+    query: |
+            select
+                count(*)::float as invalid_index
+            from
+                pg_index
+            where
+                not indisvalid;
+
+  - name: pg_trigger_disabled
+    help: Number of disabled triggers
+    values:
+      - disabled_trigger
+    query: |
+            select
+                count(*)::float as disabled_trigger
+            from
+                pg_trigger
+            where
+                lower(tgenabled) = 'd';
+
+  - name: pg_stat_statements_cpu_usage
+    help: Top statements by cpu usage per database
+    labels:
+      - datname
+      - query
+      - queryid
+    values:
+      - cputime_percent
+    query: |
+            with
+                _total as (
+                    select
+                        sum(total_time) as total_time,
+                        sum(total_time - blk_read_time - blk_write_time) as cpu_time
+                    from
+                        pg_stat_statements
+                    where
+                        dbid = (select oid from pg_database where datname = current_database())
+            ),
+                _pg_stat_statements as (
+                    select
+                        query,
+                        queryid,
+                        userid,
+                        sum(total_time) as total_time,
+                        sum(blk_read_time) as blk_read_time,
+                        sum(blk_write_time) as blk_write_time
+                    from
+                        pg_stat_statements
+                    where
+                        dbid = (select oid from pg_database where datname = current_database())
+                    group by
+                        query,
+                        queryid,
+                        userid
+            )
+            select
+                current_database()::text as datname,
+                ltrim(regexp_replace(lower(query), E'[ \\t\\n\\r]+' , ' ', 'g'))::varchar(100)::text as query,
+                queryid::text,
+                (100 * (total_time - blk_read_time - blk_write_time) / (select cpu_time from _total))::float as cputime_percent
+            from
+                _pg_stat_statements
+            where
+                (100 * (total_time - blk_read_time - blk_write_time) / (select cpu_time from _total)) >= 0.01 and
+                userid in (select usesysid from pg_user where usename not in (current_user, 'postgres')) and
+                not lower(query) like any (array['discard all', 'close all', 'deallocate%', 'set %', 'reset %', 'begin%', 'commit%', 'end%', 'rollback%', 'show%', '%pg\_%'])
+            order by
+                cputime_percent desc
+            limit 10;
+
+  - name: pg_stat_statements_disk_io_usage
+    help: Top statements by disk i/o usage per database
+    labels:
+      - datname
+      - query
+      - queryid
+    values:
+      - iotime_percent
+    query: |
+            with
+                _total as (
+                    select
+                        sum(total_time) as total_time,
+                        sum(blk_read_time + blk_write_time) as io_time
+                    from
+                        pg_stat_statements
+                    where
+                        dbid = (select oid from pg_database where datname = current_database()) and
+                        blk_read_time + blk_write_time > 0
+            ),
+                _pg_stat_statements as (
+                    select
+                        query,
+                        queryid,
+                        userid,
+                        sum(total_time) as total_time,
+                        sum(blk_read_time) as blk_read_time,
+                        sum(blk_write_time) as blk_write_time
+                    from
+                        pg_stat_statements
+                    where
+                        dbid = (select oid from pg_database where datname = current_database())
+                    group by
+                        query,
+                        queryid,
+                        userid
+            )
+            select
+                current_database()::text as datname,
+                ltrim(regexp_replace(lower(query), E'[ \\t\\n\\r]+' , ' ', 'g'))::varchar(100)::text as query,
+                queryid::text,
+                (100 * (blk_read_time + blk_write_time) / (select io_time from _total))::float as iotime_percent
+            from
+                _pg_stat_statements
+            where
+                (100 * (blk_read_time + blk_write_time) / (select io_time from _total)) >= 0.01 and
+                userid in (select usesysid from pg_user where usename not in (current_user, 'postgres')) and
+                not lower(query) like any (array['discard all', 'close all', 'deallocate%', 'set %', 'reset %', 'begin%', 'commit%', 'end%', 'rollback%', 'show%', '%pg\_%'])
+            order by
+                iotime_percent desc
+            limit 10;
+
+  - name: pg_stat_user_tables_autovacuum_count
+    help: Top tables by total number of autovacuum and autoanalyze occured
+    labels:
+      - relname
+    values:
+      - autovacuum_count
+    query: |
+            select
+                current_database()::text as datname,
+                relname::text,
+                (autovacuum_count + autoanalyze_count)::float as autovacuum_count
+            from
+                pg_stat_user_tables
+            where
+                (autovacuum_count + autoanalyze_count) > 0
+            order by
+                (autovacuum_count + autoanalyze_count) desc
+            limit 5;
+
+  - name: pg_stat_user_tables_insert
+    help: Top tables by insert statements
+    labels:
+      - datname
+      - relname
+    values:
+      - n_tup_ins
+    query: |
+            select
+                current_database()::text as datname,
+                relname::text,
+                n_tup_ins::float
+            from
+                pg_stat_user_tables
+            order by
+                n_tup_ins desc
+            limit 5;
+
+  - name: pg_stat_user_tables_update
+    help: Top tables by update statements
+    labels:
+      - datname
+      - relname
+    values:
+      - n_tup_upd
+    query: |
+            select
+                current_database()::text as datname,
+                relname::text,
+                n_tup_upd::float
+            from
+                pg_stat_user_tables
+            order by
+                n_tup_upd desc
+            limit 5;
+
+  - name: pg_stat_user_tables_delete
+    help: Top tables by delete statements
+    labels:
+      - datname
+      - relname
+    values:
+      - n_tup_del
+    query: |
+            select
+                current_database()::text as datname,
+                relname::text,
+                n_tup_del::float
+            from
+                pg_stat_user_tables
+            order by
+                n_tup_del desc
+            limit 5;
+
+  - name: pg_stat_user_tables_sequential_tuple_read
+    help: Top tables by update statements
+    labels:
+      - datname
+      - relname
+    values:
+      - seq_tup_read
+    query: |
+            select
+                current_database()::text as datname,
+                relname::text,
+                seq_tup_read::float
+            from
+                pg_stat_user_tables
+            order by
+                seq_tup_read desc
+            limit 5;
+
+  - name: pg_stat_user_functions
+    help: Top functions by number of calls
+    labels:
+      - datname
+      - funcname
+    values:
+      - calls
+      - total_time
+    query: |
+            select
+                current_database()::text as datname,
+                funcname::text,
+                calls::float,
+                total_time::float
+            from
+                pg_stat_user_functions
+            order by
+                calls desc
+            limit 10;
+
+- name: database-specific
+  interval: 300s
+  connections:
+  - postgres://sql_exporter:sql_exporter@postgres:5432/sample?sslmode=disable&application_name=sql_exporter
+  queries:
+
+  - name: pg_stat_user_indexes_bloated
+    help: Top bloated indexes by size
+    labels:
+      - index
+    values:
+      - wasted_ratio
+      - wasted_bytes
+    query: |
+            with indexes as (
+                select
+                    indexrelid,
+                    indexrelname
+                from
+                    pg_stat_user_indexes
+            )
+            select
+                index_name::text as index,
+                round((free_space * 100 / index_size)::numeric, 2)::float as wasted_ratio,
+                free_space::float as wasted_bytes
+            from (
+                select
+                    indexrelname as index_name,
+                    (select (case when avg_leaf_density = 'NaN' then 0 else greatest(ceil(index_size * (1 - avg_leaf_density / (coalesce((select (regexp_matches(reloptions::text, e'.*fillfactor=(\\d+).*'))[1]),'90')::real)))::bigint, 0) end) from pgstatindex(p.indexrelid::regclass::text)) as free_space,
+                    pg_relation_size(p.indexrelid) as index_size
+                from
+                    indexes p
+                join
+                    pg_class c on p.indexrelid = c.oid
+                join
+                    pg_index i on i.indexrelid = p.indexrelid
+                where
+                    lower(pg_get_indexdef(p.indexrelid)) like '%using btree%' and
+                    i.indisvalid and
+                    (c.relpersistence = 'p' or not pg_is_in_recovery())
+            ) as t
+            where
+                free_space > 0
+            order by
+                free_space desc
+            limit 10;
+
+  - name: pg_stat_user_tables_bloated
+    help: Top bloated tables by size
+    labels:
+      - relname
+    values:
+      - wasted_ratio
+      - wasted_bytes
+    query: |
+            select
+                relname::text,
+                round(((toast_free_space + relation_size - (relation_size - free_space) * 100 / fillfactor) * 100 / greatest(relation_size + toast_relation_size, 1))::numeric, 2)::float as wasted_ratio,
+                (toast_free_space + relation_size - (relation_size - free_space) * 100 / fillfactor)::float as wasted_bytes
+            from (
+                select
+                    nspname,
+                    relname,
+                    (select free_space from pgstattuple(c.oid)) as free_space,
+                    pg_relation_size(c.oid) as relation_size,
+                    (case when reltoastrelid = 0 then 0 else (select free_space from pgstattuple(c.reltoastrelid)) end) as toast_free_space,
+                    coalesce(pg_relation_size(c.reltoastrelid), 0) as toast_relation_size,
+                    coalesce((select (regexp_matches(reloptions::text, E'.*fillfactor=(\\d+).*'))[1]),'100')::real as fillfactor
+                from
+                    pg_class c
+                left join
+                    pg_namespace n on (n.oid = c.relnamespace)
+                where
+                    c.oid not in (select relation from pg_locks where lower(mode) = 'accessexclusivelock') and -- skip locked tables
+                    nspname !~ '^(pg_catalog|information_schema|pg_toast.*|pg_temp.*)' and
+                    relkind in ('r', 'm') and
+                    (relpersistence = 'p' or not pg_is_in_recovery())
+            ) as t
+            where
+                (toast_free_space + relation_size - (relation_size - free_space) * 100 / fillfactor) > 0
+            order by
+                wasted_bytes desc
+            limit 10;

@@ -13,10 +13,9 @@ rule_files:
 
 # A scrape configuration containing exactly one endpoint to scrape.
 scrape_configs:
-  - job_name: 'nodeexporter'
-    scrape_interval: 5s
+  - job_name: 'sql_exporter'
     static_configs:
-      - targets: ['nodeexporter:9100']
+      - targets: ['sql_exporter:9237']
 
 #  - job_name: 'prometheus'
 #    scrape_interval: 10s
@@ -29,12 +28,12 @@ scrape_configs:
 #    static_configs:
 #      - targets: ['pushgateway:9091']
 
-alerting:
-  alertmanagers:
-  - scheme: http
-    static_configs:
-    - targets: 
-      - 'alertmanager:9093'
+#alerting:
+#  alertmanagers:
+#  - scheme: http
+#    static_configs:
+#    - targets: 
+#      - 'alertmanager:9093'
 
 #  - job_name: 'nginx'
 #    scrape_interval: 10s

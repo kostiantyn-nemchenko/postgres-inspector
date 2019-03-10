@@ -19,34 +19,65 @@ services:
       - ./prometheus/:/etc/prometheus/
       - prometheus_data:/prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--config.file=/etc/prometheus/config.yml'
       - '--storage.tsdb.path=/prometheus'
       - '--web.console.libraries=/etc/prometheus/console_libraries'
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--storage.tsdb.retention.time=200h'
       - '--web.enable-lifecycle'
     restart: unless-stopped
-    expose:
-      - 9090
+#    expose:
+#      - 9090
+    ports:
+      - 9090:9090
     networks:
       - monitoring
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:6.0.0
     container_name: grafana
     volumes:
-      - grafana_data:/var/lib/grafana
+#      - grafana_data:/var/lib/grafana
       - ./grafana/datasources:/etc/grafana/datasources
       - ./grafana/dashboards:/etc/grafana/dashboards
-      - ./grafana/setup.sh:/setup.sh
-    entrypoint: /setup.sh
+      - ./grafana/bootstrap.sh:/bootstrap.sh
+    entrypoint: /bootstrap.sh
     environment:
-      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
     restart: unless-stopped
+#    expose:
+#      - 3000
+    ports:
+      - 3000:3000
+    networks:
+      - monitoring
+
+  postgres:
+    build:
+      context: ./postgresql
+    container_name: postgres
+    volumes:
+      - ./postgresql/init:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+    restart: unless-stopped
     expose:
-      - 3000
+      - 5432
+    networks:
+      - monitoring
+
+  sql_exporter:
+    image: justwatch/sql_exporter:latest
+    container_name: sql_exporter
+    volumes:
+      - ./sql_exporter:/etc/sql_exporter
+    environment:
+      - CONFIG=/etc/sql_exporter/config.yml
+    restart: unless-stopped
+    expose:
+      - 9237
     networks:
       - monitoring
 
