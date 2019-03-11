@@ -10,3 +10,5 @@ RUN set -ex; \
 
 RUN sed -i "s/#shared_preload_libraries = ''/shared_preload_libraries = 'pg_stat_statements,pg_stat_kcache'/g" /usr/share/postgresql/postgresql.conf.sample
 RUN sed -i "s/#logging_collector = off/logging_collector = on/g" /usr/share/postgresql/postgresql.conf.sample
+RUN sed -i "s/#track_io_timing = off/track_io_timing = on/g" /usr/share/postgresql/postgresql.conf.sample
+RUN sed -i "s/#track_functions = none/track_functions = pl/g" /usr/share/postgresql/postgresql.conf.sample
