@@ -17,25 +17,9 @@ scrape_configs:
     static_configs:
       - targets: ['sql_exporter:9237']
 
-#  - job_name: 'prometheus'
-#    scrape_interval: 10s
-#    static_configs:
-#      - targets: ['localhost:9090']
-
-#  - job_name: 'pushgateway'
-#    scrape_interval: 10s
-#    honor_labels: true
-#    static_configs:
-#      - targets: ['pushgateway:9091']
-
 #alerting:
 #  alertmanagers:
 #  - scheme: http
 #    static_configs:
 #    - targets: 
 #      - 'alertmanager:9093'
-
-#  - job_name: 'nginx'
-#    scrape_interval: 10s
-#    static_configs:
-#      - targets: ['nginxexporter:9113']
