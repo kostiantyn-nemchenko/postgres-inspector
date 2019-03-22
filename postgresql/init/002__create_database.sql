@@ -1,1 +1,1 @@
-CREATE DATABASE "sample" WITH OWNER "sql_exporter";
+CREATE DATABASE "sample";
