@@ -1114,7 +1114,7 @@ jobs:
             limit 5;
 
   - name: pg_stat_user_tables_sequential_tuple_read
-    help: Top tables by update statements
+    help: Top tables by read tuples using sequential scan
     labels:
       - datname
       - relname
