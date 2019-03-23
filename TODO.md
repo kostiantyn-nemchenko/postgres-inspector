@@ -1,3 +1,3 @@
 - exclude monitoring functions from TOP FUNCTIONS chart
-- document postgresql gucs which have to be enabled (track_io_timing/track_functions etc.)
-- top queries by cpu/disk io set Y-max to 100%
+- add chart description for postgresql gucs which have to be enabled (track_io_timing/track_functions etc.)
+- add chart description for lock types/modes
