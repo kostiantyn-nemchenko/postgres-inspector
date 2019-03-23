@@ -1,4 +1,3 @@
-- sql_pg_postmaster_uptime{col="uptime",database="sample",driver="postgres",host="postgres:5432",instance="sql_exporter:9237",job="sql_exporter",sql_job="global",user="sql_exporter"} - use host instead of instance
 - exclude monitoring functions from TOP FUNCTIONS chart
 - document postgresql gucs which have to be enabled (track_io_timing/track_functions etc.)
 - top queries by cpu/disk io set Y-max to 100%

@@ -82,7 +82,7 @@
         "tableColumn": "",
         "targets": [
           {
-            "expr": "sql_pg_postmaster_uptime{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\"}",
+            "expr": "sql_pg_postmaster_uptime{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\"}",
             "format": "time_series",
             "instant": true,
             "intervalFactor": 2,
@@ -165,7 +165,7 @@
         "tableColumn": "",
         "targets": [
           {
-            "expr": "sql_pg_stat_replication_lag{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\"}",
+            "expr": "sql_pg_stat_replication_lag{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\"}",
             "format": "time_series",
             "instant": true,
             "intervalFactor": 1,
@@ -248,7 +248,7 @@
         "tableColumn": "",
         "targets": [
           {
-            "expr": "sql_pg_os_getloadavg{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", col=\"load_avg_1min\"}",
+            "expr": "sql_pg_os_getloadavg{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", col=\"load_avg_1min\"}",
             "format": "time_series",
             "instant": true,
             "intervalFactor": 2,
@@ -331,7 +331,7 @@
         "tableColumn": "",
         "targets": [
           {
-            "expr": "sql_pg_os_getloadavg{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", col=\"load_avg_5min\"}",
+            "expr": "sql_pg_os_getloadavg{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", col=\"load_avg_5min\"}",
             "format": "time_series",
             "instant": true,
             "intervalFactor": 2,
@@ -414,7 +414,7 @@
         "tableColumn": "",
         "targets": [
           {
-            "expr": "sql_pg_os_getloadavg{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", col=\"load_avg_15min\"}",
+            "expr": "sql_pg_os_getloadavg{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", col=\"load_avg_15min\"}",
             "format": "time_series",
             "instant": true,
             "intervalFactor": 2,
@@ -497,7 +497,7 @@
         "tableColumn": "",
         "targets": [
           {
-            "expr": "sql_pg_psutil_swap_memory{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", col=\"used\"}",
+            "expr": "sql_pg_psutil_swap_memory{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", col=\"used\"}",
             "format": "time_series",
             "instant": true,
             "intervalFactor": 2,
@@ -560,7 +560,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "sql_pg_psutil_cpu_times_percent{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", col!=\"total\"}",
+            "expr": "sql_pg_psutil_cpu_times_percent{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", col!=\"total\"}",
             "format": "time_series",
             "hide": false,
             "instant": false,
@@ -653,7 +653,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "sql_pg_psutil_virtual_memory{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", col!~\"(total|percent)\"}",
+            "expr": "sql_pg_psutil_virtual_memory{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", col!~\"(total|percent)\"}",
             "format": "time_series",
             "hide": false,
             "instant": false,
@@ -662,7 +662,7 @@
             "refId": "A"
           },
           {
-            "expr": "sql_pg_psutil_swap_memory{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", col=\"used\"}",
+            "expr": "sql_pg_psutil_swap_memory{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", col=\"used\"}",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "swap",
@@ -753,7 +753,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "rate(sql_pg_psutil_disk_io_counters{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\"}[1m])",
+            "expr": "rate(sql_pg_psutil_disk_io_counters{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\"}[1m])",
             "format": "time_series",
             "hide": false,
             "instant": false,
@@ -846,7 +846,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "rate(sql_pg_psutil_net_io_counters{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\"}[1m])",
+            "expr": "rate(sql_pg_psutil_net_io_counters{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\"}[1m])",
             "format": "time_series",
             "hide": false,
             "instant": false,
@@ -938,63 +938,63 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "increase(sql_pg_current_logfile_errors{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\"}[1m])",
+            "expr": "increase(sql_pg_current_logfile_errors{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\"}[1m])",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ col }}",
             "refId": "B"
           },
           {
-            "expr": "increase(sql_pg_stat_archiver{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", col=\"failed_wal\"}[1m])",
+            "expr": "increase(sql_pg_stat_archiver{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", col=\"failed_wal\"}[1m])",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ col }}",
             "refId": "C"
           },
           {
-            "expr": "sql_pg_replication_slots{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\"}",
+            "expr": "sql_pg_replication_slots{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\"}",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ col }}",
             "refId": "D"
           },
           {
-            "expr": "sql_pg_stat_database_conflicts{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
+            "expr": "sql_pg_stat_database_conflicts{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ datname }} {{ col }}",
             "refId": "A"
           },
           {
-            "expr": "sql_pg_prepared_xacts{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
+            "expr": "sql_pg_prepared_xacts{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ datname }} {{ col }}",
             "refId": "E"
           },
           {
-            "expr": "sum by (database) (sql_pg_stat_user_tables_orphaned{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\"})",
+            "expr": "sum by (database) (sql_pg_stat_user_tables_orphaned{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\"})",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ database }} orphaned_tables",
             "refId": "F"
           },
           {
-            "expr": "count by (database) (sql_pg_stat_user_indexes_redundant{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\"})",
+            "expr": "count by (database) (sql_pg_stat_user_indexes_redundant{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\"})",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{  database }} redundant_indexes",
             "refId": "G"
           },
           {
-            "expr": "sql_pg_stat_user_indexes_invalid{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\"}",
+            "expr": "sql_pg_stat_user_indexes_invalid{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\"}",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ database }} {{ col }}",
             "refId": "H"
           },
           {
-            "expr": "sql_pg_trigger_disabled{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\"}",
+            "expr": "sql_pg_trigger_disabled{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\"}",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ database }} {{ col }}",
@@ -1085,7 +1085,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "sql_pg_database_size{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
+            "expr": "sql_pg_database_size{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
             "format": "time_series",
             "hide": false,
             "instant": false,
@@ -1186,7 +1186,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "sql_pg_stat_activity_backends{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\", col!=\"max_connections\"}",
+            "expr": "sql_pg_stat_activity_backends{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\", col!=\"max_connections\"}",
             "format": "time_series",
             "instant": false,
             "intervalFactor": 1,
@@ -1194,7 +1194,7 @@
             "refId": "A"
           },
           {
-            "expr": "max(sql_pg_stat_activity_backends{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", col=~\"max_connections\"})",
+            "expr": "max(sql_pg_stat_activity_backends{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", col=~\"max_connections\"})",
             "format": "time_series",
             "instant": false,
             "intervalFactor": 1,
@@ -1287,7 +1287,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "sql_pg_stat_statements_avg_time{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
+            "expr": "sql_pg_stat_statements_avg_time{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{  datname }}",
@@ -1382,7 +1382,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "sql_pg_locks_type{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
+            "expr": "sql_pg_locks_type{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ datname }} {{ type }}",
@@ -1476,7 +1476,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "sql_pg_locks_mode{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
+            "expr": "sql_pg_locks_mode{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ datname }} {{ mode }}",
@@ -1579,14 +1579,14 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "(sql_pg_buffercache_pages{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\", col!=\"max\"}) * 8192",
+            "expr": "(sql_pg_buffercache_pages{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\", col!=\"max\"}) * 8192",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ datname }} {{ col }}",
             "refId": "A"
           },
           {
-            "expr": "max((sql_pg_buffercache_pages{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", col=\"max\"}) * 8192)",
+            "expr": "max((sql_pg_buffercache_pages{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", col=\"max\"}) * 8192)",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "max_buffers",
@@ -1678,7 +1678,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "sql_pg_stat_database_cache_hit_ratio{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
+            "expr": "sql_pg_stat_database_cache_hit_ratio{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ datname }}",
@@ -1771,7 +1771,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "sql_pg_stat_kcache_hit_ratio{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
+            "expr": "sql_pg_stat_kcache_hit_ratio{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ datname }} {{ col }}",
@@ -1861,7 +1861,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "rate(sql_pg_stat_database_tuples{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}[1m])",
+            "expr": "rate(sql_pg_stat_database_tuples{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}[1m])",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ datname }} {{ col }}",
@@ -1951,7 +1951,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "sql_pg_stat_activity_max_xact_age{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
+            "expr": "sql_pg_stat_activity_max_xact_age{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ datname }}",
@@ -2048,7 +2048,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "rate(sql_pg_stat_database_transactions{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}[1m])",
+            "expr": "rate(sql_pg_stat_database_transactions{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}[1m])",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ datname }} {{ col }}",
@@ -2141,7 +2141,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "rate(sql_pg_stat_database_temp_files{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\", col=\"temp_bytes\"}[1m])",
+            "expr": "rate(sql_pg_stat_database_temp_files{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\", col=\"temp_bytes\"}[1m])",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ datname }} ",
@@ -2233,7 +2233,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "rate(sql_pg_stat_user_tables_sequential_tuple_read{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}[1m])",
+            "expr": "rate(sql_pg_stat_user_tables_sequential_tuple_read{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}[1m])",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ datname }} {{ relname }}",
@@ -2323,7 +2323,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "rate(sql_pg_stat_kcache_total_bytes{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}[1m])",
+            "expr": "rate(sql_pg_stat_kcache_total_bytes{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}[1m])",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ datname }} {{ col }}",
@@ -2420,14 +2420,14 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "rate(sql_pg_wal_rate{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\"}[1m])",
+            "expr": "rate(sql_pg_wal_rate{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\"}[1m])",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "wal writing",
             "refId": "A"
           },
           {
-            "expr": "increase(sql_pg_stat_archiver{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", col=\"archived_wal\"}[1m])",
+            "expr": "increase(sql_pg_stat_archiver{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", col=\"archived_wal\"}[1m])",
             "format": "time_series",
             "instant": false,
             "intervalFactor": 1,
@@ -2526,14 +2526,14 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "sql_pg_ls_waldir{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", col=\"wal_size\"}",
+            "expr": "sql_pg_ls_waldir{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", col=\"wal_size\"}",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "wal size",
             "refId": "A"
           },
           {
-            "expr": "sql_pg_ls_waldir{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", col=\"wal_count\"}",
+            "expr": "sql_pg_ls_waldir{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", col=\"wal_count\"}",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "wal count",
@@ -2623,7 +2623,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "increase(sql_pg_stat_bgwriter_checkpoints{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\"}[1m])",
+            "expr": "increase(sql_pg_stat_bgwriter_checkpoints{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\"}[1m])",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ col }}",
@@ -2713,7 +2713,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "rate(sql_pg_stat_bgwriter_buffers{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\"}[1h])",
+            "expr": "rate(sql_pg_stat_bgwriter_buffers{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\"}[1h])",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ col }}",
@@ -2811,14 +2811,14 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "sql_pg_stat_activity_autovacuum_workers{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\", col!=\"max\"}",
+            "expr": "sql_pg_stat_activity_autovacuum_workers{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\", col!=\"max\"}",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ datname }} {{ col }}",
             "refId": "A"
           },
           {
-            "expr": "max(sql_pg_stat_activity_autovacuum_workers{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", col=\"max\"})",
+            "expr": "max(sql_pg_stat_activity_autovacuum_workers{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", col=\"max\"})",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "max_autovacuum_workers",
@@ -2911,7 +2911,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "sql_pg_database_xacts_before_wraparound_vacuum{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
+            "expr": "sql_pg_database_xacts_before_wraparound_vacuum{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ datname }}",
@@ -3003,7 +3003,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "sql_pg_stat_user_tables_autovacuum_count{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\"}",
+            "expr": "sql_pg_stat_user_tables_autovacuum_count{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\"}",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ database }} {{ relname }}",
@@ -3095,7 +3095,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "rate(sql_pg_stat_user_tables_insert{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}[1m])",
+            "expr": "rate(sql_pg_stat_user_tables_insert{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}[1m])",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ datname }} {{ relname }}",
@@ -3187,7 +3187,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "rate(sql_pg_stat_user_tables_update{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}[1m])",
+            "expr": "rate(sql_pg_stat_user_tables_update{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}[1m])",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ datname }} {{ relname }}",
@@ -3279,7 +3279,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "rate(sql_pg_stat_user_tables_delete{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}[1m])",
+            "expr": "rate(sql_pg_stat_user_tables_delete{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}[1m])",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ datname }} {{ relname }}",
@@ -3375,7 +3375,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "sql_pg_stat_statements_duration{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
+            "expr": "sql_pg_stat_statements_duration{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
             "format": "time_series",
             "instant": false,
             "interval": "",
@@ -3470,7 +3470,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "rate(sql_pg_stat_statements_frequency{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}[1m])",
+            "expr": "rate(sql_pg_stat_statements_frequency{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}[1m])",
             "format": "time_series",
             "instant": false,
             "intervalFactor": 1,
@@ -3564,7 +3564,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "rate(sql_pg_stat_statements_result_rows{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}[1m])",
+            "expr": "rate(sql_pg_stat_statements_result_rows{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}[1m])",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ datname }} : {{ query }}",
@@ -3658,7 +3658,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "rate(sql_pg_stat_statements_disk_hit{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}[1m])",
+            "expr": "rate(sql_pg_stat_statements_disk_hit{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}[1m])",
             "format": "time_series",
             "hide": false,
             "instant": false,
@@ -3753,7 +3753,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "sql_pg_stat_statements_cpu_usage{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
+            "expr": "sql_pg_stat_statements_cpu_usage{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ datname }} : {{ query }}",
@@ -3847,7 +3847,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "sql_pg_stat_statements_disk_io_usage{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
+            "expr": "sql_pg_stat_statements_disk_io_usage{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ datname }} : {{ query }}",
@@ -3956,7 +3956,7 @@
         ],
         "targets": [
           {
-            "expr": "max by (database, relname) (sql_pg_stat_user_tables_size{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\"})",
+            "expr": "max by (database, relname) (sql_pg_stat_user_tables_size{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\"})",
             "format": "table",
             "instant": true,
             "intervalFactor": 1,
@@ -4030,7 +4030,7 @@
         ],
         "targets": [
           {
-            "expr": "max by (database, relname) (sql_pg_stat_user_indexes_size{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\"})",
+            "expr": "max by (database, relname) (sql_pg_stat_user_indexes_size{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\"})",
             "format": "table",
             "instant": true,
             "intervalFactor": 1,
@@ -4102,7 +4102,7 @@
         ],
         "targets": [
           {
-            "expr": "max by (database, index) (sql_pg_stat_user_indexes_unused{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\"})",
+            "expr": "max by (database, index) (sql_pg_stat_user_indexes_unused{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\"})",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -4193,7 +4193,7 @@
         ],
         "targets": [
           {
-            "expr": "max by (database, relname) (sql_pg_stat_user_tables_bloated{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\", col=\"wasted_bytes\"})",
+            "expr": "max by (database, relname) (sql_pg_stat_user_tables_bloated{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\", col=\"wasted_bytes\"})",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -4202,7 +4202,7 @@
             "refId": "A"
           },
           {
-            "expr": "max by (database, relname) (sql_pg_stat_user_tables_bloated{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\", col=\"wasted_ratio\"})",
+            "expr": "max by (database, relname) (sql_pg_stat_user_tables_bloated{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\", col=\"wasted_ratio\"})",
             "format": "table",
             "instant": true,
             "interval": "",
@@ -4295,7 +4295,7 @@
         ],
         "targets": [
           {
-            "expr": "max by (database, index) (sql_pg_stat_user_indexes_bloated{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\", col=\"wasted_bytes\"})\n\n",
+            "expr": "max by (database, index) (sql_pg_stat_user_indexes_bloated{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\", col=\"wasted_bytes\"})\n\n",
             "format": "table",
             "instant": true,
             "intervalFactor": 1,
@@ -4303,7 +4303,7 @@
             "refId": "A"
           },
           {
-            "expr": "max by (database, index) (sql_pg_stat_user_indexes_bloated{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\", col=\"wasted_ratio\"})",
+            "expr": "max by (database, index) (sql_pg_stat_user_indexes_bloated{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\", col=\"wasted_ratio\"})",
             "format": "table",
             "instant": true,
             "intervalFactor": 1,
@@ -4374,14 +4374,14 @@
         ],
         "targets": [
           {
-            "expr": "max by (datname, funcname) (sql_pg_stat_user_functions{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\", col=\"calls\"})",
+            "expr": "max by (datname, funcname) (sql_pg_stat_user_functions{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\", col=\"calls\"})",
             "format": "table",
             "instant": true,
             "intervalFactor": 1,
             "refId": "A"
           },
           {
-            "expr": "max by (datname, funcname) (sql_pg_stat_user_functions{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\", col=\"total_time\"})",
+            "expr": "max by (datname, funcname) (sql_pg_stat_user_functions{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\", col=\"total_time\"})",
             "format": "table",
             "instant": true,
             "intervalFactor": 1,
@@ -4426,14 +4426,14 @@
             "value": "sql_exporter"
           },
           "datasource": "$datasource",
-          "definition": "label_values(sql_pg_postmaster_uptime, instance)",
+          "definition": "label_values(sql_pg_postmaster_uptime, host)",
           "hide": 0,
           "includeAll": false,
           "label": "",
           "multi": true,
           "name": "instance",
           "options": [],
-          "query": "label_values(sql_pg_postmaster_uptime, instance)",
+          "query": "label_values(sql_pg_postmaster_uptime, host)",
           "refresh": 2,
           "regex": "/(.*):[0-9]{4}/",
           "skipUrlSync": false,
@@ -4471,14 +4471,14 @@
             "value": "$__all"
           },
           "datasource": "$datasource",
-          "definition": "label_values(sql_pg_database_size{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]{4}\"}, datname)",
+          "definition": "label_values(sql_pg_database_size{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]{4}\"}, datname)",
           "hide": 0,
           "includeAll": true,
           "label": "",
           "multi": true,
           "name": "database",
           "options": [],
-          "query": "label_values(sql_pg_database_size{job=~\"[[job_name]]\", instance=~\"[[instance]]:[0-9]{4}\"}, datname)",
+          "query": "label_values(sql_pg_database_size{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]{4}\"}, datname)",
           "refresh": 2,
           "regex": "",
           "skipUrlSync": false,
