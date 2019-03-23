@@ -3003,7 +3003,7 @@
         "steppedLine": false,
         "targets": [
           {
-            "expr": "sql_pg_stat_user_tables_autovacuum_count{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\"}",
+            "expr": "increase(sql_pg_stat_user_tables_autovacuum_count{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\"}[1h])",
             "format": "time_series",
             "intervalFactor": 1,
             "legendFormat": "{{ database }} {{ relname }}",
@@ -3032,7 +3032,7 @@
         "yaxes": [
           {
             "format": "short",
-            "label": "total autovacuums",
+            "label": "autovacuums / hour",
             "logBase": 1,
             "max": null,
             "min": "0",
