@@ -1,0 +1,7 @@
+- exclude monitoring functions from TOP FUNCTIONS chart
+- add chart description for postgresql gucs which have to be enabled (track_io_timing/track_functions etc.)
+- add chart description for lock types/modes
+- create sql_exporter container after postgres
+- pgsql_postmaster_down - no retry of sending alert if db is still down
+- UPTIME single stat chart - show last uptime value even if db is down for a long time
+- {{ .CommonLabels.alertname }} is empty when multiple alerts occurred
