@@ -959,10 +959,10 @@
             "refId": "D"
           },
           {
-            "expr": "sql_pg_stat_database_conflicts{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}",
+            "expr": "increase(sql_pg_stat_database_conflicts{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", datname=~\"[[database]]\"}[1m])",
             "format": "time_series",
             "intervalFactor": 1,
-            "legendFormat": "{{ datname }} {{ col }}",
+            "legendFormat": "{{ datname }} {{ col }}_conflict",
             "refId": "A"
           },
           {
@@ -980,10 +980,10 @@
             "refId": "F"
           },
           {
-            "expr": "count by (database) (sql_pg_stat_user_indexes_redundant{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\"})",
+            "expr": "sql_pg_stat_user_indexes_redundant{job=~\"[[job_name]]\", host=~\"[[instance]]:[0-9]+\", database=~\"[[database]]\"}",
             "format": "time_series",
             "intervalFactor": 1,
-            "legendFormat": "{{  database }} redundant_indexes",
+            "legendFormat": "{{ database }} {{ col }}",
             "refId": "G"
           },
           {

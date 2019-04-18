@@ -5,6 +5,8 @@ networks:
     driver: bridge
 
 volumes:
+    grafana_data: {}
+    postgresql_data: {}
     prometheus_data: {}
 
 services:
@@ -23,8 +25,8 @@ services:
       - '--storage.tsdb.retention.time=200h'
       - '--web.enable-lifecycle'
     restart: unless-stopped
-    expose:
-      - 9090
+    ports:
+      - 9090:9090
     networks:
       - monitoring
 
@@ -32,6 +34,7 @@ services:
     image: grafana/grafana:latest
     container_name: grafana
     volumes:
+      - grafana_data:/var/lib/grafana
       - ./grafana/datasources:/etc/grafana/datasources
       - ./grafana/dashboards:/etc/grafana/dashboards
       - ./grafana/bootstrap.sh:/bootstrap.sh
@@ -51,6 +54,7 @@ services:
       context: ./postgresql
     container_name: postgres
     volumes:
+      - postgresql_data:/var/lib/postgresql
       - ./postgresql/init:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_INITDB_ARGS: "--data-checksums"
@@ -82,7 +86,7 @@ services:
 #      - '--config.file=/etc/alertmanager/config.yml'
 #      - '--storage.path=/alertmanager'
 #    restart: unless-stopped
-#    expose:
-#      - 9093
+#    ports:
+#      - 9093:9093
 #    networks:
 #      - monitoring

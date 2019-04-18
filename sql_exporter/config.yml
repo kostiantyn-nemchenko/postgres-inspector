@@ -140,7 +140,7 @@ jobs:
     query: |
             select
                 d.datname::text,
-                count(px.*)::float
+                count(px.*)::float as prepared_xacts
             from
                 pg_database d
             left join
@@ -851,21 +851,22 @@ jobs:
             limit 10;
 
   - name: pg_stat_user_indexes_redundant
-    help: Top redundant indexes by size
-    labels:
-      - index
+    help: Number of redundant indexes
     values:
-      - size
+      - redundant_indexes
     query: |
             select
-                (array_agg(indexrelid::regclass))[1]::text as index,
-                sum(pg_relation_size(indexrelid))::float as size
-            from
-                pg_index
-            group by
-                (indrelid::text || indclass::text || indkey::text || coalesce(indexprs::text, '') || coalesce(indpred::text, ''))
-            having
-                count(*) > 1;
+                count(*)::float AS redundant_indexes
+            from (
+                select
+                    (array_agg(indexrelid::regclass))[1]::text as index
+                from
+                    pg_index
+                group by
+                    (indrelid::text || indclass::text || indkey::text || coalesce(indexprs::text, '') || coalesce(indpred::text, ''))
+                having
+                    count(*) > 1
+            ) t;
 
   - name: pg_stat_user_tables_size
     help: Top tables/matviews by size
